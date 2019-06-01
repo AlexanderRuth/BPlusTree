@@ -1,3 +1,13 @@
+/*
+*	BPlusTree.h
+*
+*	By: Alex Ruth
+*	Github: AlexanderRuth
+*
+*	Templated C++ implementation of a B+ Tree
+*	View documentation at https://github.com/AlexanderRuth/BPlusTree
+*/
+
 #ifndef BTREE_H
 #define BTREE_H
 
