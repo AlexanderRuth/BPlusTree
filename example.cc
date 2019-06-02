@@ -69,5 +69,15 @@ int main()
 	cout << "Student Name: " << cur_student->name << endl;
 	cout << "GPA: " << cur_student->gpa << endl;
 
+	//Remove entry with primary key of 2
+	if(student_tree.remove(2))
+		cout << "Successfully removed student with ID 2" << endl;
+	
+	//Remove the remaining entries
+	//(Remove() calls free)
+	for(int i = 1; i < 1001; i++){
+		student_tree.remove(i);
+	}
+
 	return 0;
 }

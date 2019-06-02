@@ -33,23 +33,34 @@ class BTree {
 		// 1 = Key for the given entry
 		// 2 = Pointer to actual data (only for leaf nodes)
 		// 3 = Pointer to right node
-		typedef tuple<struct DataNode_t*, K, T*, struct DataNode_t*> data_entry;
+		typedef tuple<struct DataNode_t*, K, T*, struct DataNode_t*> 
+			data_entry;
 		
 		//A struct that holds a vector of data entries
 		//Local to the given templated version of the BTree
 
 		struct DataNode_t{
 			vector< data_entry > m_entries; //List of data_entry's
-			int m_num_entries;		//Number of valid entries
-			struct DataNode_t* m_right;	//Pointer to its right neighbor
-			int m_max_entries;		//Max number of possible entries
+
+			int m_num_entries;		//Number of 
+							//valid entries
+			
+			struct DataNode_t* m_right;	//Pointer to its 
+							//right neighbor
+						
+			int m_max_entries;		//Max number of 
+							//possible entries
+
 			bool m_is_leaf;			//Is the node a leaf?
 
 			//Constructor
 			//
-			//Takes max number of entries, and sets values to default
+			//Takes max number of entries, 
+			//and sets values to default
 			DataNode_t(int max_entries, bool is_leaf) 
-				: m_right(NULL), m_num_entries(0), m_is_leaf(is_leaf)
+				: m_num_entries(0), 
+				  m_right(NULL),
+				  m_is_leaf(is_leaf)
 			{
 				m_entries.resize(max_entries);
 				m_max_entries = max_entries;
@@ -57,15 +68,16 @@ class BTree {
 
 			//next()
 			//
-			//Get a pointer to the next level of nodes based on the key 
+			//Get a pointer to the next level of nodes 
+			//based on the key 
 			//NOTE: Returns NULL if at a leaf
 			struct DataNode_t* next(K key)
 			{
 				int i;		//Loop counter
 				K cur_key;	//Current key being checked
 			
-				//If there are no entries, then the tree is empty
-				//and this is the root
+				//If there are no entries, 
+				//then the tree is empty and this is the root
 				if(m_num_entries == 0)
 					return NULL;
 
@@ -79,7 +91,8 @@ class BTree {
 						return get<3>(m_entries.at(i));
 				}
 
-				//If greater than every key, return rightmost pointer
+				//If greater than every key, 
+				//return rightmost pointer
 				i--;
 				return get<3>(m_entries.at(i));			
 			}
@@ -91,7 +104,6 @@ class BTree {
 			T* retrieve(K key)
 			{
 				int i;
-				K cur_key;
 				
 				if(m_num_entries == 0)
 					return NULL;
@@ -123,7 +135,8 @@ class BTree {
 			
 					//Search for index
 					for(i = 0; i < m_num_entries; i++){
-						cur_key = get<1>(m_entries.at(i));
+						cur_key = 
+							get<1>(m_entries.at(i));
 					
 						if(get<1>(entry) <= cur_key)
 							break;
@@ -134,23 +147,63 @@ class BTree {
 
 				//Insert the entry at the given index
 				m_num_entries++;
-				m_entries.insert(m_entries.begin()+index, entry);
+				m_entries.insert(m_entries.begin()+index, 
+							entry);
 
-				//Update the pointers to the left and right entries,
-				//if they exist
+				//Update the pointers to the left and 
+				//right entries, if they exist
 				if(index != 0)
-					get<3>(m_entries.at(index-1)) = get<0>(entry);
+					get<3>(m_entries.at(index-1)) = 
+						get<0>(entry);
 				if(index != m_num_entries-1)
-					get<0>(m_entries.at(index+1)) = get<3>(entry);
+					get<0>(m_entries.at(index+1)) = 
+						get<3>(entry);
 
 				//Insert successful!
 				return true;
 			}
 
+			//remove()
+			//
+			//Remove a leaf entry based on a key
+			bool remove(K key)
+			{
+				int i;		//Loop counter
+				K cur_key;	//Current node key
+
+				//If not a leaf node, do not delete
+				//(Since no coalescing)
+				if(!m_num_entries || !m_is_leaf)
+					return false;
+
+				//Find a matching key
+				for(i = 0; i < m_num_entries; i++){
+					cur_key = get<1>(m_entries.at(i));
+					
+					if(cur_key == key){
+						
+						//Free stored pointer
+						delete get<2>(m_entries.at(i));
+
+						//Erase the entry
+						m_entries.erase(
+							m_entries.begin() + i);
+
+						return true;
+					}
+				}
+
+				//No match found
+				return false;
+			}
+
 			//mid_entry()
 			//
 			//Returns he middle entry of the data node
-			data_entry mid_entry(){ return m_entries.at(m_num_entries / 2 + 1); }
+			data_entry mid_entry()
+			{ 
+				return m_entries.at(m_num_entries / 2 + 1); 
+			}
 
 			//is_full()
 			//
@@ -163,7 +216,8 @@ class BTree {
 			void inorder()
 			{
 				for(int i = 0; i < m_num_entries; i++)
-					cout << "[i=" << i << " k=" << get<1>(m_entries.at(i)) << "]";
+					cout << "[i=" << i << " k=" 
+					<< get<1>(m_entries.at(i)) << "]";
 				cout << endl;
 			}
 
@@ -172,29 +226,31 @@ class BTree {
 
 		//Public methods		
 
-		BTree();					//Default Constructor
-		BTree(int);					//Constructor with user defined block size
-		bool insert(K, T*);				//Insert into the B+ Tree
-		void inorder(int);				//Print the contents of the B+ Tree
-		T* retrieve(K);					//Get a pointer to a given entry
-		int depth();					//Return the depth of the tree
-		~BTree();					//Deconstructor
+		BTree();		//Default Constructor
+		BTree(int);		//Constructor with user 
+					//defined block size
+		bool insert(K, T*);	//Insert into the B+ Tree
+		bool remove(K);		//Remove from the B+ Tree
+		void inorder(int);	//Print the contents of the B+ Tree
+		T* retrieve(K);		//Get a pointer to a given entry
+		int depth();		//Return the depth of the tree
+		~BTree();		//Deconstructor
 
 	private:
 		
 		//Members
 
-		DataNode *m_root;					//Root of the tree
-		const int m_block_size;					//Block size for each node
-		const int m_max_entries;				//Max entries for each node
-		int m_depth;						//Current depth (starts at 0)
+		DataNode *m_root;		//Root of the tree
+		const int m_block_size;		//Block size for each node
+		const int m_max_entries;	//Max entries for each node
+		int m_depth;			//Current depth (starts at 0)
 
 		//Super secret methods
 
-		bool insert_recursive(DataNode*, K, T*, data_entry&);	//Recursive insert call
-		T* retrieve_recursive(K, DataNode*);			//Recursive retrieve call
-		void split(DataNode*, bool, data_entry&);		//Split a given node
-		void delete_recursive(DataNode*);			//Recursive deconstruction
+		bool insert_recursive(DataNode*, K, T*, data_entry&);	
+		T* retrieve_recursive(K, DataNode*);			
+		void split(DataNode*, bool, data_entry&);		
+		void delete_recursive(DataNode*);			
 };
 
 //Default constructor
@@ -227,6 +283,7 @@ BTree<K,T>::BTree(int block_size)
 template <class K, class T>
 BTree<K,T>::~BTree()
 {
+	//If root is not a leaf, then start traversing the left of the tree
 	if(!m_root->m_is_leaf)
 		delete_recursive(get<0>(m_root->m_entries.at(0)));
 
@@ -239,30 +296,22 @@ BTree<K,T>::~BTree()
 template <class K, class T>
 void BTree<K,T>::delete_recursive(DataNode* curr)
 {
-	DataNode* tmp;
+	DataNode* tmp;	//Loop over data right nodes
 
-	if(!curr->m_is_leaf){
+	//If not leaf, keep going
+	if(!curr->m_is_leaf)
 		delete_recursive(get<0>(curr->m_entries.at(0)));
-		
-		while(curr->m_right){
-			tmp = curr->m_right;
-			curr->m_entries.clear();
-			delete curr;
-			curr=tmp;
-		}
-		delete curr;
-	}
-	else{
-		while(curr->m_right){
-			tmp = curr->m_right;
-			curr->m_entries.clear();
-			delete curr;
-			curr=tmp;
-		}
 
+	//Delete the current level
+	while(curr->m_right){
+		tmp = curr->m_right;
 		curr->m_entries.clear();
 		delete curr;
+		curr=tmp;
 	}
+
+	curr->m_entries.clear();
+	delete curr;
 }
 
 //inorder()
@@ -333,7 +382,8 @@ bool BTree<K,T>::insert(K key, T *data)
 //
 //Private. Recursive portion of the insert method
 template <class K, class T>
-bool BTree<K,T>::insert_recursive(DataNode *curr, K key, T *data, data_entry &entry)
+bool BTree<K,T>::insert_recursive(DataNode *curr, K key, T *data, 
+					data_entry &entry)
 {
 	
 	//If not at leaf, keep recursing
@@ -373,6 +423,24 @@ bool BTree<K,T>::insert_recursive(DataNode *curr, K key, T *data, data_entry &en
 	}
 }
 
+//remove()
+//
+//Remove from the B+ Tree based on the key.
+//Currently does not perform coalescing
+//(may implement this later)
+template <class K, class T>
+bool BTree<K,T>::remove(K key)
+{
+	//Traverse to the leaf node
+	DataNode* curr = m_root;
+
+	while(curr->next(key))
+		curr = curr->next(key);
+
+	//Remove the entry
+	return curr->remove(key);
+}
+
 //retrieve()
 //
 //Public wrapper around retrieve. Returns a pointer
@@ -405,10 +473,13 @@ T* BTree<K,T>::retrieve_recursive(K key, DataNode* curr)
 template <class K, class T>
 void  BTree<K,T>::split(DataNode* to_split, bool is_leaf, data_entry &new_entry)
 {
-	int half_size = (m_max_entries) / 2;			//Half the size of DataNode
-	K mid_key;						//The key in the middle
+	int half_size = (m_max_entries) / 2;		//Half the size of 
+							//DataNode
+							
+	K mid_key;					//The key in the middle
+
 	DataNode* right_node = 
-		new DataNode(m_max_entries, is_leaf);		//Allocate a new node
+		new DataNode(m_max_entries, is_leaf);	//Allocate a new node
 
 	
 	//Get the middle key
